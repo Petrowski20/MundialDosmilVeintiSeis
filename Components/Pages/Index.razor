@@ -1,0 +1,72 @@
+﻿@page "/"
+@inject SupabaseService Supabase
+
+
+<MudContainer MaxWidth="MaxWidth.Large" Class="my-4">
+    <MudText Typo="Typo.h3" GutterBottom="true">Predicciones Mundial 2026 ⚽</MudText>
+
+    <MudGrid Spacing="2">
+        @if (matches == null)
+        {
+            <MudProgressCircular Color="Color.Primary" Indeterminate="true" />
+        }
+        else if (matches.Count == 0)
+        {
+            <MudAlert Severity="Severity.Info">No hay partidos pendientes para predecir.</MudAlert>
+        }
+        else
+        {
+            @foreach (var match in matches)
+            {
+                <MudItem xs="12" sm="6" md="4">
+                    <MudCard>
+                        <MudCardHeader>
+                            <MudText>@(match.HomeTeam?.Name ?? "Local") vs @(match.AwayTeam?.Name ?? "Visitante")</MudText>
+                            <MudText Typo="Typo.body2">@match.MatchDate.LocalDateTime.ToString("dd MMM HH:mm")</MudText>
+                        </MudCardHeader>
+                        <MudCardContent>
+                            <EditForm Model="@currentPrediction" OnValidSubmit="() => SavePrediction(match)">
+                                <DataAnnotationsValidator />
+                                <ValidationSummary />
+
+                                <MudTextField @bind-Value="@currentPrediction.PredHomeGoals" Label="Goles local" Variant="Variant.Outlined" Type="number" Adornment="Adornment.End" AdornmentIcon="@Icons.Material.Filled.Score" />
+                                <MudTextField @bind-Value="@currentPrediction.PredAwayGoals" Label="Goles visitante" Variant="Variant.Outlined" Type="number" Adornment="Adornment.End" AdornmentIcon="@Icons.Material.Filled.Score" />
+
+                                @if (match.Stage != MatchStage.GROUP_STAGE)
+                                {
+                                    <MudSelect @bind-Value="@currentPrediction.PredWinnerId" Label="Quién pasa en penaltis (si empate)" Variant="Variant.Outlined">
+                                        <MudSelectItem Value="@match.HomeTeamId">@match.HomeTeam?.Name</MudSelectItem>
+                                        <MudSelectItem Value="@match.AwayTeamId">@match.AwayTeam?.Name</MudSelectItem>
+                                    </MudSelect>
+                                }
+
+                                <MudButton Variant="Variant.Filled" Color="Color.Primary" ButtonType="ButtonType.Submit" Class="mt-4">Guardar Predicción</MudButton>
+                            </EditForm>
+                        </MudCardContent>
+                    </MudCard>
+                </MudItem>
+            }
+        }
+    </MudGrid>
+</MudContainer>
+
+@code {
+    private List<Match> matches = new();
+    private Prediction currentPrediction = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        matches = await Supabase.GetUpcomingMatchesAsync();
+    }
+
+    private async Task SavePrediction(Match match)
+    {
+        currentPrediction.MatchId = match.Id;
+        currentPrediction.ProfileId = Guid.NewGuid();  // TODO: Cambiar por auth.CurrentUser.Id en Fase 1.5
+
+        await Supabase.SavePredictionAsync(currentPrediction);
+
+        // Snackbar success (añadimos en Fase 2)
+        currentPrediction = new Prediction();  // Resetea el form
+    }
+}
