@@ -17,7 +17,7 @@ public class Prediction : BaseModel
 
     [Required(ErrorMessage ="El código de partido es obligatorio.")]
     [Column("match_id")]
-    public Guid MatchId { get; set; }
+    public int MatchId { get; set; }
 
     [Required(ErrorMessage ="Los goles locales son obligatorios.")]
     [Range(0, 20, ErrorMessage = "Los goles deben estar entre 0 y 20.")]

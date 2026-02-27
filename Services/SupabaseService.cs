@@ -22,7 +22,6 @@ public class SupabaseService
         }
         catch (Exception ex)
         {
-            // Log or throw
             throw new InvalidOperationException("Error inicializando Supabase", ex);
         }
     }
@@ -32,8 +31,8 @@ public class SupabaseService
     {
         var response = await _client
             .From<Match>()
-            .Where(m => m.Status == Models.Enums.MatchStatus.PENDING)
-            // CORRECCIÓN: Usar Constants.Ordering.Ascending
+            // SOLUCIÓN: Usamos Filter() y .ToString() para que envíe "PENDING" en la URL en lugar de un "0"
+            .Filter("status", Constants.Operator.Equals, Models.Enums.MatchStatus.PENDING.ToString())
             .Order(m => m.MatchDate, Constants.Ordering.Ascending)
             .Get();
 

@@ -1,13 +1,18 @@
-﻿namespace MundialDosmilVeintiSeis.Models
+﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
+
+namespace MundialDosmilVeintiSeis.Models
 {
     public class Enums
     {
+        [JsonConverter(typeof(StringEnumConverter))]
         public enum MatchStatus
         {
             PENDING,
             IN_PLAY,
             FINISHED
         }
+        [JsonConverter(typeof(StringEnumConverter))]
         public enum MatchStage
         {
             GROUP_STAGE,
@@ -17,6 +22,7 @@
             SEMI_FINALS,
             FINAL
         }
+        [JsonConverter(typeof(StringEnumConverter))]
         public enum GroupLetter
         {
             A, B, C, D, E, F, G, H, I, J, K, L

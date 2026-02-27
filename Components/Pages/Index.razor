@@ -1,72 +1,141 @@
 ﻿@page "/"
-@inject SupabaseService Supabase
+@using MundialDosmilVeintiSeis.Models
+@using static MundialDosmilVeintiSeis.Models.Enums
 
+<MudContainer MaxWidth="MaxWidth.Medium" Class="my-6">
 
-<MudContainer MaxWidth="MaxWidth.Large" Class="my-4">
-    <MudText Typo="Typo.h3" GutterBottom="true">Predicciones Mundial 2026 ⚽</MudText>
+    <MudText Typo="Typo.h4"
+             Align="Align.Center"
+             GutterBottom="true"
+             Style="font-weight:600;">
+        Mundial 2026 ⚽
+    </MudText>
 
-    <MudGrid Spacing="2">
-        @if (matches == null)
-        {
-            <MudProgressCircular Color="Color.Primary" Indeterminate="true" />
-        }
-        else if (matches.Count == 0)
-        {
-            <MudAlert Severity="Severity.Info">No hay partidos pendientes para predecir.</MudAlert>
-        }
-        else
-        {
-            @foreach (var match in matches)
+    @if (_isLoading)
+    {
+        <div class="d-flex justify-center my-10">
+            <MudProgressCircular Indeterminate="true" />
+        </div>
+    }
+    else
+    {
+        <!-- CALENDARIO -->
+        <div class="calendar-wrapper">
+            <div class="calendar-strip">
+                @foreach (var date in visibleDates)
+                {
+                    var isSelected = date.Date == selectedDate.Date;
+
+                    <div class="@($"calendar-day {(isSelected ? "selected-day" : "")}")"
+                         @onclick="@(() => ChangeDate(date))">
+
+                        <MudText Typo="Typo.caption" Class="day-name">
+                            @date.ToString("ddd").ToUpper()
+                        </MudText>
+
+                        <MudText Typo="Typo.body2" Class="day-date">
+                            @date.ToString("dd MMM")
+                        </MudText>
+
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- PARTIDOS -->
+        <div class="matches-container">
+
+            @if (allMatches.Count == 0)
             {
-                <MudItem xs="12" sm="6" md="4">
-                    <MudCard>
-                        <MudCardHeader>
-                            <MudText>@(match.HomeTeam?.Name ?? "Local") vs @(match.AwayTeam?.Name ?? "Visitante")</MudText>
-                            <MudText Typo="Typo.body2">@match.MatchDate.LocalDateTime.ToString("dd MMM HH:mm")</MudText>
-                        </MudCardHeader>
+                <div class="empty-box">
+                    <MudText Typo="Typo.body2">
+                        Aún no hay partidos en la base de datos.
+                    </MudText>
+                </div>
+            }
+            else if (displayedMatches.Count == 0)
+            {
+                <div class="empty-box">
+                    <MudText Typo="Typo.body2">
+                        No hay partidos programados para este día.
+                    </MudText>
+                </div>
+            }
+            else
+            {
+                @foreach (var match in displayedMatches)
+                {
+                    <MudCard Elevation="0" Outlined="true" Class="match-card">
                         <MudCardContent>
-                            <EditForm Model="@currentPrediction" OnValidSubmit="() => SavePrediction(match)">
-                                <DataAnnotationsValidator />
-                                <ValidationSummary />
 
-                                <MudTextField @bind-Value="@currentPrediction.PredHomeGoals" Label="Goles local" Variant="Variant.Outlined" Type="number" Adornment="Adornment.End" AdornmentIcon="@Icons.Material.Filled.Score" />
-                                <MudTextField @bind-Value="@currentPrediction.PredAwayGoals" Label="Goles visitante" Variant="Variant.Outlined" Type="number" Adornment="Adornment.End" AdornmentIcon="@Icons.Material.Filled.Score" />
+                            <div class="text-center mb-2">
+                                <MudText Typo="Typo.caption" Color="Color.Secondary">
+                                    @(match.Stage == MatchStage.GROUP_STAGE
+                                                            ? $"Grupo {match.GroupLetter}"
+                                                            : match.Stage.ToString().Replace("_", " "))
+                                </MudText>
+                            </div>
 
-                                @if (match.Stage != MatchStage.GROUP_STAGE)
-                                {
-                                    <MudSelect @bind-Value="@currentPrediction.PredWinnerId" Label="Quién pasa en penaltis (si empate)" Variant="Variant.Outlined">
-                                        <MudSelectItem Value="@match.HomeTeamId">@match.HomeTeam?.Name</MudSelectItem>
-                                        <MudSelectItem Value="@match.AwayTeamId">@match.AwayTeam?.Name</MudSelectItem>
-                                    </MudSelect>
-                                }
+                            <div class="match-row">
+                                <div class="team text-end">
+                                    @(match.HomeTeam?.Name ?? "Por definir")
+                                </div>
 
-                                <MudButton Variant="Variant.Filled" Color="Color.Primary" ButtonType="ButtonType.Submit" Class="mt-4">Guardar Predicción</MudButton>
+                                <div class="match-center">
+                                    @if (match.Status == MatchStatus.FINISHED)
+                                    {
+                                        <MudChip T="string" Color="Color.Success">
+                                            @match.HomeGoals - @match.AwayGoals
+                                        </MudChip>
+                                    }
+                                    else
+                                    {
+                                        <MudChip T="string" Variant="Variant.Outlined">
+                                            @match.MatchDate.LocalDateTime.ToString("HH:mm")
+                                        </MudChip>
+                                    }
+                                </div>
+
+                                <div class="team text-start">
+                                    @(match.AwayTeam?.Name ?? "Por definir")
+                                </div>
+                            </div>
+
+                            <MudDivider Class="my-2" />
+
+                            <EditForm Model="@predictions[match.Id]"
+                                      OnValidSubmit="@(() => SavePrediction(match.Id))">
+
+                                <div class="prediction-row">
+                                    <MudTextField @bind-Value="@predictions[match.Id].PredHomeGoals"
+                                                  Label="Local"
+                                                  Variant="Variant.Outlined"
+                                                  Type="number"
+                                                  Margin="Margin.Dense" />
+
+                                    <MudTextField @bind-Value="@predictions[match.Id].PredAwayGoals"
+                                                  Label="Visitante"
+                                                  Variant="Variant.Outlined"
+                                                  Type="number"
+                                                  Margin="Margin.Dense" />
+                                </div>
+
+                                <div class="text-center mt-2">
+                                    <MudButton Variant="Variant.Filled"
+                                               Color="Color.Primary"
+                                               ButtonType="ButtonType.Submit"
+                                               Size="Size.Small">
+                                        Guardar
+                                    </MudButton>
+                                </div>
+
                             </EditForm>
+
                         </MudCardContent>
                     </MudCard>
-                </MudItem>
+                }
             }
-        }
-    </MudGrid>
+        </div>
+    }
+
 </MudContainer>
-
-@code {
-    private List<Match> matches = new();
-    private Prediction currentPrediction = new();
-
-    protected override async Task OnInitializedAsync()
-    {
-        matches = await Supabase.GetUpcomingMatchesAsync();
-    }
-
-    private async Task SavePrediction(Match match)
-    {
-        currentPrediction.MatchId = match.Id;
-        currentPrediction.ProfileId = Guid.NewGuid();  // TODO: Cambiar por auth.CurrentUser.Id en Fase 1.5
-
-        await Supabase.SavePredictionAsync(currentPrediction);
-
-        // Snackbar success (añadimos en Fase 2)
-        currentPrediction = new Prediction();  // Resetea el form
-    }
-}

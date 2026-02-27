@@ -1,0 +1,53 @@
+﻿.calendar-wrapper {
+    display: flex;
+    justify-content: center;
+    margin: 30px 0;
+}
+
+.calendar-strip {
+    display: grid;
+    grid-template-columns: repeat(7, 80px);
+    gap: 12px;
+}
+
+.calendar-day {
+    cursor: pointer;
+    border: 1px solid #d0d7e3; /* borde suave azul-grisáceo en todos los días */
+    border-radius: 8px;
+    padding: 10px;
+    text-align: center;
+    background: white;
+    transition: all 0.2s ease;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06); /* sombrita sutil */
+}
+
+    .calendar-day:hover {
+        transform: translateY(-2px);
+        border-color: #90caf9; /* borde azul al pasar el ratón */
+        background: #f0f7ff; /* fondo azul muy clarito en hover */
+    }
+
+.selected-day {
+    background: #e3f2fd; /* azul muy clarito (Material Blue 50) */
+    color: #1565c0; /* texto azul oscuro para contraste */
+    border: 2px solid #1976d2; /* borde azul más marcado */
+    font-weight: 600;
+}
+
+    .selected-day .day-name,
+    .selected-day .day-date {
+        color: #1565c0; /* fuerza el color en los MudText internos */
+    }
+
+.match-card {
+    margin-bottom: 16px;
+    border-color: #e0e0e0;
+}
+
+.empty-box {
+    text-align: center;
+    padding: 40px;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    color: #777;
+}

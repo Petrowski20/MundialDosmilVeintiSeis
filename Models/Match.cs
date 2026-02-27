@@ -10,14 +10,18 @@ public class Match : BaseModel
 {
     [PrimaryKey("id")]
     [Column("id")]
-    public Guid Id { get; set; } = Guid.NewGuid();
+    public int Id { get; set; }
 
     [Column("home_team_id")]
     public int HomeTeamId { get; set; }
+
+    [Reference(typeof(Team), ReferenceAttribute.JoinType.Left, foreignKey: "fk_matches_home_team")]
     public Team? HomeTeam { get; set; }
 
     [Column("away_team_id")]
     public int AwayTeamId { get; set; }
+
+    [Reference(typeof(Team), ReferenceAttribute.JoinType.Left, foreignKey: "fk_matches_away_team")]
     public Team? AwayTeam { get; set; }
 
     [Required(ErrorMessage ="La fecha y hora del partido es obligatoria.")]
