@@ -19,7 +19,6 @@
     }
     else
     {
-        <!-- CALENDARIO -->
         <div class="calendar-wrapper">
             <div class="calendar-strip">
                 @foreach (var date in visibleDates)
@@ -42,97 +41,92 @@
             </div>
         </div>
 
-        <!-- PARTIDOS -->
+        <MudSelect T="int"
+                   Label="Filtrar por equipo"
+                   @bind-Value="selectedTeamId"
+                   Variant="Variant.Outlined"
+                   Class="mb-6">
+            <MudSelectItem T="int" Value="0">Todos los equipos</MudSelectItem>
+            @foreach (var team in allTeams)
+            {
+                <MudSelectItem T="int" Value="@team.Id">@team.Name (@team.IsoCode)</MudSelectItem>
+            }
+        </MudSelect>
+
         <div class="matches-container">
 
             @if (allMatches.Count == 0)
             {
                 <div class="empty-box">
-                    <MudText Typo="Typo.body2">
-                        Aún no hay partidos en la base de datos.
+                    <MudIcon Icon="@Icons.Material.Filled.EventBusy" Size="Size.Large" Class="mb-2" />
+                    <MudText Typo="Typo.subtitle1">
+                        Todavía no hay partidos cargados.
+                    </MudText>
+                    <MudText Typo="Typo.body2" Color="Color.Secondary">
+                        Cuando se publiquen los encuentros del Mundial 2026 aparecerán aquí.
                     </MudText>
                 </div>
             }
             else if (displayedMatches.Count == 0)
             {
                 <div class="empty-box">
-                    <MudText Typo="Typo.body2">
-                        No hay partidos programados para este día.
+                    <MudIcon Icon="@Icons.Material.Filled.SearchOff" Size="Size.Large" Class="mb-2" />
+                    <MudText Typo="Typo.subtitle1">
+                        No hay partidos para esta selección.
+                    </MudText>
+                    <MudText Typo="Typo.body2" Color="Color.Secondary">
+                        Prueba con otro día o elimina el filtro de equipo.
                     </MudText>
                 </div>
             }
             else
             {
-                @foreach (var match in displayedMatches)
+                @foreach (var group in displayedMatches.GroupBy(m => m.Stage == MatchStage.GROUP_STAGE ? $"GRUPO {m.GroupLetter}" : m.Stage.ToString().Replace("_", " ")).OrderBy(g => g.Key))
                 {
-                    <MudCard Elevation="0" Outlined="true" Class="match-card">
-                        <MudCardContent>
+                    <MudText Typo="Typo.h6" Class="mt-8 mb-3" Style="font-weight: 600; text-align: center; color: #424242;">
+                        @group.Key
+                    </MudText>
 
-                            <div class="text-center mb-2">
-                                <MudText Typo="Typo.caption" Color="Color.Secondary">
-                                    @(match.Stage == MatchStage.GROUP_STAGE
-                                                            ? $"Grupo {match.GroupLetter}"
-                                                            : match.Stage.ToString().Replace("_", " "))
-                                </MudText>
-                            </div>
+                    <MudPaper Elevation="0" Outlined="true" Class="overflow-hidden mb-6">
+                        @foreach (var match in group)
+                        {
+                            <div class="match-row d-flex align-center justify-space-between pa-4">
 
-                            <div class="match-row">
-                                <div class="team text-end">
-                                    @(match.HomeTeam?.Name ?? "Por definir")
+                                <div class="d-flex align-center justify-end" style="flex: 1;">
+                                    <span class="fw-bold me-3" style="font-weight: 500;">@(match.HomeTeam?.Name ?? "Por definir")</span>
+                                    <span class="fs-4">@(match.HomeTeam?.FlagEmoji ?? "🏳️")</span>
                                 </div>
 
-                                <div class="match-center">
+                                <div class="d-flex flex-column align-center justify-center px-4" style="min-width: 140px;">
                                     @if (match.Status == MatchStatus.FINISHED)
                                     {
-                                        <MudChip T="string" Color="Color.Success">
-                                            @match.HomeGoals - @match.AwayGoals
-                                        </MudChip>
+                                        <span class="mb-1" style="font-size: 0.75rem; color: #757575;">Finalizado</span>
+                                        <div class="score-box px-3 py-1 rounded fw-bold fs-5">
+                                            @match.HomeGoals <span class="mx-1">-</span> @match.AwayGoals
+                                        </div>
+                                    }
+                                    else if (match.Status == MatchStatus.IN_PLAY)
+                                    {
+                                        <span class="fw-bold pulse-text mb-1" style="font-size: 0.75rem; color: #d32f2f;">En juego</span>
+                                        <div class="score-box px-3 py-1 rounded fw-bold fs-5" style="color: #d32f2f; border-color: #d32f2f;">
+                                            @match.HomeGoals <span class="mx-1">-</span> @match.AwayGoals
+                                        </div>
                                     }
                                     else
                                     {
-                                        <MudChip T="string" Variant="Variant.Outlined">
-                                            @match.MatchDate.LocalDateTime.ToString("HH:mm")
-                                        </MudChip>
+                                        <span class="fw-bold mb-1" style="font-weight: 600;">@match.MatchDate.LocalDateTime.ToString("HH:mm")</span>
+                                        <span style="font-size: 0.85rem; color: #9e9e9e;">VS.</span>
                                     }
                                 </div>
 
-                                <div class="team text-start">
-                                    @(match.AwayTeam?.Name ?? "Por definir")
+                                <div class="d-flex align-center justify-start" style="flex: 1;">
+                                    <span class="fs-4 me-3">@(match.AwayTeam?.FlagEmoji ?? "🏳️")</span>
+                                    <span class="fw-bold" style="font-weight: 500;">@(match.AwayTeam?.Name ?? "Por definir")</span>
                                 </div>
+
                             </div>
-
-                            <MudDivider Class="my-2" />
-
-                            <EditForm Model="@predictions[match.Id]"
-                                      OnValidSubmit="@(() => SavePrediction(match.Id))">
-
-                                <div class="prediction-row">
-                                    <MudTextField @bind-Value="@predictions[match.Id].PredHomeGoals"
-                                                  Label="Local"
-                                                  Variant="Variant.Outlined"
-                                                  Type="number"
-                                                  Margin="Margin.Dense" />
-
-                                    <MudTextField @bind-Value="@predictions[match.Id].PredAwayGoals"
-                                                  Label="Visitante"
-                                                  Variant="Variant.Outlined"
-                                                  Type="number"
-                                                  Margin="Margin.Dense" />
-                                </div>
-
-                                <div class="text-center mt-2">
-                                    <MudButton Variant="Variant.Filled"
-                                               Color="Color.Primary"
-                                               ButtonType="ButtonType.Submit"
-                                               Size="Size.Small">
-                                        Guardar
-                                    </MudButton>
-                                </div>
-
-                            </EditForm>
-
-                        </MudCardContent>
-                    </MudCard>
+                        }
+                    </MudPaper>
                 }
             }
         </div>

@@ -26,7 +26,6 @@ public class SupabaseService
         }
     }
 
-    // ==================== PARTIDOS ====================
     public async Task<List<Match>> GetUpcomingMatchesAsync()
     {
         var response = await _client
@@ -45,12 +44,17 @@ public class SupabaseService
         return response.Models;
     }
 
-    // ==================== PREDICCIONES ====================
     public async Task SavePredictionAsync(Prediction prediction)
     {
         await _client
             .From<Prediction>()
             // CORRECCIÓN: Usar QueryOptions en lugar de UpsertOptions
             .Upsert(prediction, new QueryOptions { OnConflict = "profile_id,match_id" });
+    }
+
+    public async Task<List<Team>> GetAllTeamsAsync()
+    {
+        var response = await _client.From<Team>().Get();
+        return response.Models;
     }
 }

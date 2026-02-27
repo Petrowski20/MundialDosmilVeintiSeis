@@ -1,0 +1,84 @@
+﻿@page "/register"
+
+<MudContainer MaxWidth="MaxWidth.Small" Class="mt-10">
+    <MudPaper Elevation="3" Class="pa-8">
+        <MudText Typo="Typo.h4" Align="Align.Center" GutterBottom="true">Únete a la Porra 🏆</MudText>
+
+        @if (_isLoading)
+        {
+            <div class="d-flex justify-center my-6">
+                <MudProgressCircular Indeterminate="true" Color="Color.Primary" />
+            </div>
+        }
+        else if (_isInvalidToken)
+        {
+            <MudAlert Severity="Severity.Error" Class="my-4">
+                Este enlace de invitación no es válido o ya ha sido utilizado. Pide uno nuevo al administrador.
+            </MudAlert>
+        }
+        else
+        {
+            <EditForm Model="@registerDto" OnValidSubmit="HandleRegistration">
+                <DataAnnotationsValidator />
+
+                <MudTextField @bind-Value="registerDto.Email"
+                              Label="Correo Electrónico"
+                              Variant="Variant.Outlined"
+                              ReadOnly="true"
+                              Class="mb-4" />
+
+                <MudTextField @bind-Value="registerDto.Nickname"
+                              Label="Nickname (Tu apodo público)"
+                              Variant="Variant.Outlined"
+                              Required="true"
+                              Class="mb-4" />
+
+                <MudTextField @bind-Value="registerDto.Password"
+                              Label="Contraseña"
+                              Variant="Variant.Outlined"
+                              InputType="InputType.Password"
+                              Required="true"
+                              Class="mb-4" />
+
+                <MudDatePicker @bind-Date="_birthDate"
+                               Label="Fecha de nacimiento"
+                               Variant="Variant.Outlined"
+                               Required="true"
+                               Class="mb-4" />
+
+                <MudTextField @bind-Value="registerDto.City"
+                              Label="Ciudad de residencia"
+                              Variant="Variant.Outlined"
+                              Required="true"
+                              Class="mb-4" />
+
+                <MudAutocomplete T="FavoriteClub"
+                                 Label="Tu club de fútbol favorito"
+                                 @bind-Value="_selectedClub"
+                                 SearchFunc="@SearchClubs"
+                                 ToStringFunc="@(c => c?.Name)"
+                                 Variant="Variant.Outlined"
+                                 Required="true"
+                                 ShowProgressIndicator="true"
+                                 Class="mb-6" />
+
+                <MudButton ButtonType="ButtonType.Submit"
+                           Variant="Variant.Filled"
+                           Color="Color.Primary"
+                           Size="Size.Large"
+                           FullWidth="true"
+                           Disabled="@_isRegistering">
+                    @if (_isRegistering)
+                    {
+                        <MudProgressCircular Class="ms-n1" Size="Size.Small" Indeterminate="true" />
+                        <span class="ms-2">Registrando...</span>
+                    }
+                    else
+                    {
+                        <span>Completar Registro</span>
+                    }
+                </MudButton>
+            </EditForm>
+        }
+    </MudPaper>
+</MudContainer>
