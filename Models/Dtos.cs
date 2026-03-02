@@ -1,4 +1,6 @@
-﻿namespace MundialDosmilVeintiSeis.Models
+﻿using static MundialDosmilVeintiSeis.Models.Enums;
+
+namespace MundialDosmilVeintiSeis.Models
 {
     public class Dtos
     {
@@ -11,6 +13,7 @@
             public string City { get; set; } = string.Empty;
             public int FavoriteClubId { get; set; }
             public Guid InvitationId { get; set; }
+            public int PrivateLeagueId { get; set; }
         }
     }
 }

@@ -23,7 +23,8 @@ namespace MundialDosmilVeintiSeis.Services
             { "birth_date", dto.BirthDate?.ToString("yyyy-MM-dd") ?? "" },
             { "city", dto.City.ToUpper() }, // Reforzamos las mayúsculas aquí también
             { "favorite_club_id", dto.FavoriteClubId },
-            { "invitation_id", dto.InvitationId }
+            { "invitation_id", dto.InvitationId },
+            { "private_league_id", dto.PrivateLeagueId }
           };
             var options = new SignUpOptions { Data = metadata };
 

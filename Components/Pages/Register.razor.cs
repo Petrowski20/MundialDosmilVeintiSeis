@@ -20,13 +20,18 @@ namespace MundialDosmilVeintiSeis.Components.Pages
         [Inject]
         ISnackbar Snackbar { get; set; }
 
-        [SupplyParameterFromQuery]
+        [SupplyParameterFromQuery(Name = "token")]
         public Guid? Token { get; set; }
 
         private RegisterDto registerDto = new();
         private DateTime? _birthDate;
         private FavoriteClub? _selectedClub;
         private List<FavoriteClub> _allClubs = new();
+        private string CityUppercase
+        {
+            get => registerDto.City;
+            set => registerDto.City = value?.ToUpper() ?? string.Empty;
+        }
 
         private bool _isLoading = true;
         private bool _isInvalidToken = false;
@@ -34,6 +39,7 @@ namespace MundialDosmilVeintiSeis.Components.Pages
 
         protected override async Task OnInitializedAsync()
         {
+            Console.WriteLine($"🔍 Token capturado de la URL: {Token}"); // AÑADE ESTO
             // 1. Validar que exista un token en la URL
             if (Token == null)
             {
@@ -61,6 +67,7 @@ namespace MundialDosmilVeintiSeis.Components.Pages
                     registerDto.InvitationId = invitation.Id;
                     registerDto.Email = invitation.Email;
                     registerDto.Nickname = invitation.SuggestedUsername ?? "";
+                    registerDto.PrivateLeagueId = invitation.PrivateLeagueId ?? 1;
 
                     // 3. Cargamos la lista de clubes para el Autocomplete
                     var clubsResponse = await Supabase.From<FavoriteClub>().Get();
@@ -90,12 +97,15 @@ namespace MundialDosmilVeintiSeis.Components.Pages
         }
         private async Task HandleRegistration()
         {
+            if (_selectedClub == null || _selectedClub.Id == 0)
+            {
+                Snackbar.Add("Por favor, selecciona un club válido de la lista desplegable.", Severity.Warning);
+                return;
+            }
+
             // Pasamos los valores visuales al DTO antes de enviarlo
             registerDto.BirthDate = _birthDate;
-            if (_selectedClub != null)
-            {
-                registerDto.FavoriteClubId = _selectedClub.Id;
-            }
+            registerDto.FavoriteClubId = _selectedClub.Id;
 
             _isRegistering = true;
 

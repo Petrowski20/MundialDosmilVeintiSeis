@@ -1,6 +1,7 @@
 ﻿using Supabase.Postgrest.Attributes;
 using Supabase.Postgrest.Models;
 using System.ComponentModel.DataAnnotations;
+using static MundialDosmilVeintiSeis.Models.Enums;
 
 namespace MundialDosmilVeintiSeis.Models
 {
@@ -16,6 +17,12 @@ namespace MundialDosmilVeintiSeis.Models
 
         [Column("suggested_username")]
         public string? SuggestedUsername { get; set; }
+
+        [Column("private_league_id")]
+        public int? PrivateLeagueId { get; set; }
+
+        [Reference(typeof(PrivateLeague))]
+        public PrivateLeague? PrivateLeague { get; set; }
 
         [Column("is_used")]
         public bool IsUsed { get; set; } = false;

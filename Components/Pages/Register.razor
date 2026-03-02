@@ -28,7 +28,7 @@
                               Class="mb-4" />
 
                 <MudTextField @bind-Value="registerDto.Nickname"
-                              Label="Nickname (Tu apodo público)"
+                              Label="Username (Tu apodo público)"
                               Variant="Variant.Outlined"
                               Required="true"
                               Class="mb-4" />
@@ -44,6 +44,10 @@
                                Label="Fecha de nacimiento"
                                Variant="Variant.Outlined"
                                Required="true"
+                               OpenTo="OpenTo.Year"
+                               Editable="true"
+                               DateFormat="dd/MM/yyyy"
+                               Placeholder="DD/MM/AAAA"
                                Class="mb-4" />
 
                 <MudTextField @bind-Value="registerDto.City"

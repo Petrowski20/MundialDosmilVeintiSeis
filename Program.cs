@@ -7,20 +7,32 @@ using MundialDosmilVeintiSeis.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+// 1. Componentes Blazor
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
+// 2. EL MOTOR DE SUPABASE (¡Esto es lo que faltaba!)
+// Asegúrate de que los nombres coinciden con tu appsettings.json
+var supabaseUrl = builder.Configuration["Supabase:Url"] ?? throw new Exception("Falta Supabase:Url");
+var supabaseKey = builder.Configuration["Supabase:Key"] ?? throw new Exception("Falta Supabase:Key");
+
+builder.Services.AddScoped<Supabase.Client>(_ =>
+    new Supabase.Client(supabaseUrl, supabaseKey, new Supabase.SupabaseOptions
+    {
+        AutoRefreshToken = true,
+        AutoConnectRealtime = true
+    }));
+
+// 3. Sistema de Autenticación de Blazor
 builder.Services.AddAuthorizationCore();
 builder.Services.AddCascadingAuthenticationState();
-
-// Registra tu proveedor personalizado que acabamos de crear
 builder.Services.AddScoped<AuthenticationStateProvider, SupabaseAuthStateProvider>();
-
-// Tu AuthService (ya lo tenías, asegúrate de que esté)
 builder.Services.AddScoped<AuthService>();
 
-// MudBlazor - UI moderna, responsive, dark mode, snackbars bonitos
+// 4. Tu servicio de base de datos
+builder.Services.AddScoped<SupabaseService>();
+
+// 5. MudBlazor - UI moderna
 builder.Services.AddMudServices(config =>
 {
     config.SnackbarConfiguration.PositionClass = Defaults.Classes.Position.BottomRight;
@@ -31,13 +43,10 @@ builder.Services.AddMudServices(config =>
 
 builder.Services.AddHttpClient();
 
-// Supabase - Nuestro backend completo (DB + Auth + Realtime)
-builder.Services.AddSingleton<SupabaseService>();
+// 6. Background Service 
+// (LO COMENTAMOS TEMPORALMENTE HASTA QUE ARREGLEMOS SU INYECCIÓN DE DEPENDENCIAS)
+// builder.Services.AddHostedService<MatchUpdateService>();
 
-// Background Service - Actualiza resultados y estadísticas de equipos 1 vez al día
-builder.Services.AddHostedService<MatchUpdateService>();
-
-// Logging (veremos en consola cuando se ejecute el job diario)
 builder.Logging.AddConsole();
 
 var app = builder.Build();

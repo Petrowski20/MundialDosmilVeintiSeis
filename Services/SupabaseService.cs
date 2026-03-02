@@ -9,21 +9,9 @@ public class SupabaseService
 {
     private readonly Supabase.Client _client;
 
-    public SupabaseService(IConfiguration configuration)
+    public SupabaseService(Supabase.Client client)
     {
-        var url = configuration["Supabase:Url"] ?? throw new InvalidOperationException("Falta Supabase:Url en appsettings.json");
-        var key = configuration["Supabase:Key"] ?? throw new InvalidOperationException("Falta Supabase:Key en appsettings.json");
-
-        var options = new SupabaseOptions { AutoConnectRealtime = true };
-        _client = new Supabase.Client(url, key, options);
-        try
-        {
-            _client.InitializeAsync().Wait();
-        }
-        catch (Exception ex)
-        {
-            throw new InvalidOperationException("Error inicializando Supabase", ex);
-        }
+        _client = client;
     }
 
     public async Task<List<Match>> GetUpcomingMatchesAsync()
