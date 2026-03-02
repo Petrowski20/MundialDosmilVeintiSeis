@@ -1,0 +1,43 @@
+﻿@using MudBlazor
+@using MundialDosmilVeintiSeis.Models
+
+<MudDialog>
+    <DialogContent>
+        <MudTextField @bind-Value="_editModel.Nickname" Label="Nickname" Required="true" Variant="Variant.Outlined" Class="mb-3" />
+
+        <MudTextField @bind-Value="_editModel.City" Label="Ciudad" Variant="Variant.Outlined" Class="mb-3" />
+
+        <MudSelect T="Enums.UserRole" @bind-Value="_selectedRole" Label="Rol" Variant="Variant.Outlined" Class="mb-3">
+            <MudSelectItem Value="Enums.UserRole.USER">Usuario</MudSelectItem>
+            <MudSelectItem Value="Enums.UserRole.ADMIN">Administrador</MudSelectItem>
+        </MudSelect>
+
+        @if (_isLoadingLeagues)
+        {
+            <MudProgressLinear Color="Color.Primary" Indeterminate="true" Class="mt-2" />
+        }
+        else
+        {
+            <MudSelect T="int" Label="Ligas Asignadas" MultiSelection="true" @bind-SelectedValues="_selectedLeagueIds" Variant="Variant.Outlined">
+                @foreach (var league in _allLeagues)
+                {
+                    <MudSelectItem T="int" Value="@league.Id">@league.Name</MudSelectItem>
+                }
+            </MudSelect>
+        }
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="@Cancel">Cancelar</MudButton>
+        <MudButton Color="Color.Warning" Variant="Variant.Filled" OnClick="@GuardarCambios" Disabled="@_isSubmitting">
+            @if (_isSubmitting)
+            {
+                <MudProgressCircular Class="ms-n1" Size="Size.Small" Indeterminate="true" />
+                <MudText Class="ms-2">Guardando...</MudText>
+            }
+            else
+            {
+                <MudText>Guardar Cambios</MudText>
+            }
+        </MudButton>
+    </DialogActions>
+</MudDialog>

@@ -1,0 +1,29 @@
+﻿@namespace MundialDosmilVeintiSeis.Components.Shared
+@using MudBlazor
+@using MundialDosmilVeintiSeis.Models
+
+<MudDialog>
+    <DialogContent>
+        <MudText Typo="Typo.body2" Class="mb-4">
+            Crea una nueva liga privada para agrupar a diferentes amigos, compañeros de trabajo o familiares.
+        </MudText>
+
+        <MudTextField @bind-Value="_league.Name" Label="Nombre de la Liga" Required="true" Variant="Variant.Outlined" Class="mb-3" />
+
+        <MudTextField @bind-Value="_league.Description" Label="Descripción (Opcional)" Lines="3" Variant="Variant.Outlined" Class="mb-3" />
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="@Cancel">Cancelar</MudButton>
+        <MudButton Color="Color.Secondary" Variant="Variant.Filled" OnClick="@CrearLiga" Disabled="@_isSubmitting">
+            @if (_isSubmitting)
+            {
+                <MudProgressCircular Class="ms-n1" Size="Size.Small" Indeterminate="true" />
+                <MudText Class="ms-2">Creando...</MudText>
+            }
+            else
+            {
+                <MudText>Guardar Liga</MudText>
+            }
+        </MudButton>
+    </DialogActions>
+</MudDialog>

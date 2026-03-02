@@ -27,5 +27,11 @@ namespace MundialDosmilVeintiSeis.Models
         {
             A, B, C, D, E, F, G, H, I, J, K, L
         }
+        [JsonConverter(typeof(StringEnumConverter))]
+        public enum UserRole
+        {
+            USER,
+            ADMIN
+        }
     }
 }

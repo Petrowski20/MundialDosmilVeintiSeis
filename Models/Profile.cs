@@ -20,6 +20,10 @@ namespace MundialDosmilVeintiSeis.Models
         public int TotalPoints { get; set; } = 0;
 
         [Required]
+        [Column("role")]
+        public UserRole Role { get; set; } = UserRole.USER;
+
+        [Required]
         [Column("birth_date")]
         public DateTime? BirthDate { get; set; }
 
@@ -33,5 +37,10 @@ namespace MundialDosmilVeintiSeis.Models
 
         [Reference(typeof(FavoriteClub))]
         public FavoriteClub? FavoriteClub { get; set; }
+
+        [Required]
+        [Column("created_at")]
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
     }
 }

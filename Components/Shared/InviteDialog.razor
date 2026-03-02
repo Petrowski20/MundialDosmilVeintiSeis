@@ -1,0 +1,42 @@
+﻿@using MudBlazor
+@using MundialDosmilVeintiSeis.Models
+
+<MudDialog>
+    <DialogContent>
+        <MudText Typo="Typo.body2" Class="mb-4">
+            Genera un enlace de registro único para un amigo. Ese enlace le asignará directamente a la liga que elijas.
+        </MudText>
+
+        <MudTextField @bind-Value="_email" Label="Correo Electrónico" Required="true" InputType="InputType.Email" Variant="Variant.Outlined" Class="mb-3" />
+
+        <MudTextField @bind-Value="_suggestedUsername" Label="Nickname Sugerido (Opcional)" Variant="Variant.Outlined" Class="mb-3" />
+
+        @if (_isLoadingLeagues)
+        {
+            <MudProgressLinear Color="Color.Primary" Indeterminate="true" Class="mt-2" />
+        }
+        else
+        {
+            <MudSelect T="int" @bind-Value="_selectedLeagueId" Label="Asignar a Liga Privada" Variant="Variant.Outlined" Required="true" AnchorOrigin="Origin.BottomCenter">
+                @foreach (var league in _leagues)
+                {
+                    <MudSelectItem T="int" Value="@league.Id">@league.Name</MudSelectItem>
+                }
+            </MudSelect>
+        }
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">Cancelar</MudButton>
+        <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="GenerarInvitacion" Disabled="@_isSubmitting">
+            @if (_isSubmitting)
+            {
+                <MudProgressCircular Class="ms-n1" Size="Size.Small" Indeterminate="true" />
+                <MudText Class="ms-2">Generando...</MudText>
+            }
+            else
+            {
+                <MudText>Generar Enlace</MudText>
+            }
+        </MudButton>
+    </DialogActions>
+</MudDialog>

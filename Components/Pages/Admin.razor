@@ -1,0 +1,89 @@
+﻿@page "/admin"
+@using MundialDosmilVeintiSeis.Models
+@using MundialDosmilVeintiSeis.Services
+@using Microsoft.AspNetCore.Components.Authorization
+
+<MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="mt-8">
+
+    <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center" Class="mb-6">
+        <MudText Typo="Typo.h3">Panel de Control ⚙️</MudText>
+        <MudStack Row="true" Spacing="2">
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.PersonAdd" OnClick="AbrirDialogoInvitacion">
+                Invitar Participante
+            </MudButton>
+            <MudButton Variant="Variant.Outlined" Color="Color.Secondary" StartIcon="@Icons.Material.Filled.Add" OnClick="AbrirDialogoLiga">
+                Crear Liga
+            </MudButton>
+        </MudStack>
+    </MudStack>
+
+    @if (_isLoading)
+    {
+        <MudProgressCircular Color="Color.Primary" Indeterminate="true" />
+    }
+    else
+    {
+        <MudTabs Elevation="2" Rounded="true" ApplyEffectsToContainer="true" PanelClass="pa-6">
+
+            @* PESTAÑA 1: USUARIOS *@
+            <MudTabPanel Text="Usuarios" Icon="@Icons.Material.Filled.People">
+                <MudTable Items="@_profiles" Hover="true" Breakpoint="Breakpoint.Sm" Loading="@_isLoading" LoadingProgressColor="Color.Info">
+                    <HeaderContent>
+                        <MudTh>Nickname</MudTh>
+                        <MudTh>Puntos</MudTh>
+                        <MudTh>Ligas</MudTh>
+                        <MudTh>Rol</MudTh>
+                        <MudTh>Fecha Registro</MudTh>
+                        <MudTh>Acciones</MudTh>
+                    </HeaderContent>
+                    <RowTemplate>
+                        <MudTd DataLabel="Nickname">
+                            <MudText Typo="Typo.body1" Color="Color.Primary"><b>@context.Nickname</b></MudText>
+                            <MudText Typo="Typo.caption">ID: @context.Id.ToString().Substring(0, 8)...</MudText>
+                        </MudTd>
+                        <MudTd DataLabel="Puntos">@context.TotalPoints</MudTd>
+                        <MudTd DataLabel="Ligas">
+                            @* Aquí pondremos los Chips cuando carguemos la tabla puente *@
+                            <MudChip T="string" Size="Size.Small" Color="Color.Info">Próximamente</MudChip>
+                        </MudTd>
+                        <MudTd DataLabel="Rol">
+                            <MudChip T="string" Size="Size.Small" Color="@(context.Role == Enums.UserRole.ADMIN ? Color.Secondary : Color.Default)">
+                                @context.Role
+                            </MudChip>
+                        </MudTd>
+                        <MudTd DataLabel="Fecha">@context.CreatedAt.ToString("dd/MM/yyyy")</MudTd>
+                        <MudTd DataLabel="Acciones">
+                            <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Warning" Size="Size.Small" OnClick="@(() => EditarUsuario(context))" />
+                            <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" Size="Size.Small" OnClick="@(() => BorrarUsuario(context))" />
+                        </MudTd>
+                    </RowTemplate>
+                </MudTable>
+            </MudTabPanel>
+
+            @* PESTAÑA 2: INVITACIONES *@
+            <MudTabPanel Text="Invitaciones Pendientes" Icon="@Icons.Material.Filled.Mail">
+                <MudText Typo="Typo.h6">Próximamente: Tabla de invitaciones no usadas</MudText>
+            </MudTabPanel>
+
+            @* PESTAÑA 3: LIGAS *@
+            <MudTabPanel Text="Gestión de Ligas" Icon="@Icons.Material.Filled.EmojiEvents">
+                <MudTable Items="@_leagues" Hover="true" Breakpoint="Breakpoint.Sm" Class="mt-4">
+                    <HeaderContent>
+                        <MudTh>ID</MudTh>
+                        <MudTh>Nombre</MudTh>
+                        <MudTh>Descripción</MudTh>
+                        <MudTh>Fecha Creación</MudTh>
+                    </HeaderContent>
+                    <RowTemplate>
+                        <MudTd DataLabel="ID">@context.Id</MudTd>
+                        <MudTd DataLabel="Nombre"><b>@context.Name</b></MudTd>
+                        <MudTd DataLabel="Descripción">@context.Description</MudTd>
+                        <MudTd DataLabel="Fecha Creación">@context.CreatedAt.ToString("dd/MM/yyyy")</MudTd>
+                    </RowTemplate>
+                </MudTable>
+            </MudTabPanel>
+
+        </MudTabs>
+    }
+
+</MudContainer>
